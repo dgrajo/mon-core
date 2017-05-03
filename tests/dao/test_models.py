@@ -94,3 +94,16 @@ class TestModels:
         db.commit()
         for host in db.query(Host).all():
             assert db.query(Service).filter(Service.host_id==host.id).count() == 3
+
+    def test_tblservices_insert_service(self, db):
+        host = db.query(Host).filter(Host.name == 'Hub 2').first()
+        db.add(Service(host_id=host.id, name="decom_service", alias="Decommised Service"))
+        db.commit()
+        assert db.query(Service).filter(Service.host_id==host.id).count() == 4
+
+    def test_tblsevices_delete_service(self, db):
+        service = db.query(Service).filter(Service.name=="decom_service").first()
+        db.delete(service)
+        db.commit()
+        host = db.query(Host).filter(Host.name == 'Hub 2').first()
+        assert len(host.services) == 3

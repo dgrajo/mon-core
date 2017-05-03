@@ -31,6 +31,13 @@ class Host(Base):
 
     services = relationship("Service", back_populates=__tablename__)
 
+    def __repr__(self):
+        return "Host(id={}, name={}, endpoint={})".format(
+                self.id,
+                self.name,
+                self.endpoint,
+                )
+
 
 class Service(Base):
     """
@@ -48,3 +55,11 @@ class Service(Base):
     alias = Column(String(128), nullable=False)
 
     hosts = relationship("Host", back_populates=__tablename__)
+
+    def __repr__(self):
+        return "Service(id={}, host_id={}, name={}, alias={})".format(
+                self.id,
+                self.host_id,
+                self.name,
+                self.alias,
+                )
