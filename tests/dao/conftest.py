@@ -21,16 +21,15 @@ def pytest_runtest_setup(item):
         if previousfailed is not None:
             pytest.xfail("previous test failed (%s)" %previousfailed.name)
 
-
-@lru_cache()
-def engine_factory(name):
-    return create_engine('sqlite:///:memory:')
-
-@pytest.fixture()
+@pytest.fixture(scope="class")
 def db():
-    engine = engine_factory('simple')
+    print(" < db fixture setup")
+    engine = create_engine('sqlite:///:memory:')
+    #engine = create_engine('sqlite:///a.db')
     Base.metadata.create_all(engine)
     Session = sessionmaker(bind=engine)
     session = Session()
     yield session
-
+    print(" > db fixture teardown")
+    session.close()
+    engine.dispose()
