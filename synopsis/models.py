@@ -73,6 +73,7 @@ class Host(Base):
     endpoint = Column(String(128), nullable=False)
 
     services = relationship("Service", back_populates=__tablename__)
+    host_attributes = relationship("HostAttribute", back_populates=__tablename__)
 
     hostgroups = relationship(
             "HostGroup",
@@ -88,35 +89,18 @@ class Host(Base):
                 )
 
 
-class Service(Base):
-    """
-    Service data model, this represents a/an attribute/service that is
-    being montored on a specified host.
-    """
-    __tablename__ = 'services'
+class HostAttribute(Base):
+    __tablename__ = 'host_attributes'
     id = Column(
             Integer,
             Sequence('{}_id_seq'.format(__tablename__)),
             primary_key=True,
             )
     host_id = Column(Integer, ForeignKey('hosts.id'))
-    name = Column(String(64), unique=True, nullable=False)
-    alias = Column(String(128), nullable=False)
+    name = Column(String(32), nullable=False)
+    value = Column(String(32), nullable=False)
 
     hosts = relationship("Host", back_populates=__tablename__)
-    servicegroups = relationship(
-            "ServiceGroup",
-            secondary=assoc_factory(__tablename__, 'servicegroups', Base),
-            back_populates=__tablename__,
-            )
-
-    def __repr__(self):
-        return "Service(id='{}', host_id='{}', name='{}', alias='{}')".format(
-                self.id,
-                self.host_id,
-                self.name,
-                self.alias,
-                )
 
 
 class HostGroup(Base):
@@ -136,9 +120,56 @@ class HostGroup(Base):
             secondary=assoc_factory(__tablename__, 'hosts', Base),
             back_populates=__tablename__,
             )
-    
+
     def __repr__(self):
         return "HostGroup(id='{}', name='{}')".format(self.id, self.name)
+
+
+class Service(Base):
+    """
+    Service data model, this represents a/an attribute/service that is
+    being montored on a specified host.
+    """
+    __tablename__ = 'services'
+    id = Column(
+            Integer,
+            Sequence('{}_id_seq'.format(__tablename__)),
+            primary_key=True,
+            )
+    host_id = Column(Integer, ForeignKey('hosts.id'))
+    name = Column(String(64), unique=True, nullable=False)
+    alias = Column(String(128), nullable=False)
+
+    hosts = relationship("Host", back_populates=__tablename__)
+    service_attributes = relationship("ServiceAttribute", back_populates=__tablename__)
+
+    servicegroups = relationship(
+            "ServiceGroup",
+            secondary=assoc_factory(__tablename__, 'servicegroups', Base),
+            back_populates=__tablename__,
+            )
+
+    def __repr__(self):
+        return "Service(id='{}', host_id='{}', name='{}', alias='{}')".format(
+                self.id,
+                self.host_id,
+                self.name,
+                self.alias,
+                )
+
+
+class ServiceAttribute(Base):
+    __tablename__ = 'service_attributes'
+    id = Column(
+            Integer,
+            Sequence('{}_id_seq'.format(__tablename__)),
+            primary_key=True,
+            )
+    service_id = Column(Integer, ForeignKey('services.id'))
+    name = Column(String(32), nullable=False)
+    value = Column(String(32), nullable=False)
+
+    services = relationship("Service", back_populates=__tablename__)
 
 
 class ServiceGroup(Base):
